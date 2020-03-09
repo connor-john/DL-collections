@@ -2,7 +2,7 @@
  Collection of Deep Learning Models and References
  
 ### Current Environment
-Environment used will be specified in code
+Using either Pytorch, or Keras with tensorflow backend. _(Environment used will be specified in code comment header)_
 
 ### In progress
  - Deep Learning A-Z: Hands-On Artificial Neural Networks (Udemy)
