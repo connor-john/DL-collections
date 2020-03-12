@@ -1,8 +1,10 @@
 # DL-collections
  Collection of Deep Learning Models and References
  
-### Current Environment
-Using either Pytorch, or Keras with tensorflow backend. _(Environment used will be specified in code comment header)_
+### Environment
+Mainly using PyTorch. _(Environment used will be specified in code comment header if otherwise)_ 
+
+<img src="https://images.exxactcorp.com/CMS/landing-page/resource-center/supported-software/deep-learning/pytorch/PyTorch-logo.jpg" width=300 align=left><br><br><br>
 
 ### In progress
  - Cutting-Edge AI: Deep Reingorcement Learning in Python (Udemy)
