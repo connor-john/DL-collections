@@ -40,34 +40,58 @@ def play_one(env, policy_m, state, gamma):
     reward_pool = []
     steps = 0
     
-    prob = policy_m(state)
-    m = Bernoulli(prob)
-    action = m.sample()
+    for t in count():
+        prob = policy_m(state)
+        m = Bernoulli(prob)
+        action = m.sample()
     
-    action = action.data.numpy().astype(int)[0]
-    next_state, reward, done, _ = env.step(action)
-    env.render(mode='rgb_array')
+        action = action.data.numpy().astype(int)[0]
+        next_state, reward, done, _ = env.step(action)
+        env.render(mode='rgb_array')
     
-    if done:
-        reward = 0
+        if done:
+            reward = 0
     
-    state_pool.append(state)
-    action_pool.append(float(action))
-    reward_pool.append(reward)
+        state_pool.append(state)
+        action_pool.append(float(action))
+        reward_pool.append(reward)
     
-    state = next_state
-    state = torch.from_numpy(state).float()
-    state = Variable(state)
+        state = next_state
+        state = torch.from_numpy(state).float()
+        state = Variable(state)
     
-    steps += 1
+        steps += 1
     
-    if done:
-        episode_durations.append(t + 1)
-        plot_durations()
+        if done:
+            episode_durations.append(t + 1)
+            plot_durations()
         
-    ####
+        
+def update_policy(steps, gamma, optimizer, state_pool, action_pool, reward_pool, policy_m):
+    running_add = 0
+    for i in reversed(range(steps)):
+        if reward_pool[i] == 0:
+            running_add = 0
+        else:
+            running_add = running_add * gamma + reward_pool[i]
+            reward_pool[i] = running_add
     
-def update_policy():
+    reward_mean = np.mean(reward_pool)
+    reward_std = np.std(reward_pool)
+    for i in range(steps):
+        reward_pool[i] = (reward_pool[i] - reward_mean) / reward_std
+    
+    optimizer.zero_grad()
+    
+    for i in range(steps):
+        state = state_pool[i]
+        action = Variable(torch.FloatTensor([action_pool[i]]))
+        reward = reward_pool[i]
+        probs = policy_m(state)
+        m = Bernoulli(probs)
+        loss = -m.log_prob(action) * reward  
+        loss.backward()
+    
 
 def main():
     # Plot duration curve (taken from https://pytorch.org/tutorials/intermediate/reinforcement_q_learning.html)
@@ -102,6 +126,9 @@ def main():
         state = torch.from_numpy(state).float
         state = Variable(state)
         env.render(mode='rgb_array')
+        play_one()
+        if ep > 0 and ep % batch_size == 0:
+            update_policy()
         
 
 if __name__ == '__main__':
