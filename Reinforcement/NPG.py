@@ -4,85 +4,107 @@ Created on Thu Mar 12 20:02:14 2020
 
 @author: Connor
 @environment: pytorch
-Naive Policy Gradient approach to solve cartpole problem
+@references: 
+    https://pytorch.org/tutorials/intermediate/reinforcement_q_learning
+    https://karpathy.github.io/2016/05/31/rl/
+    
+Monte-Carlo Policy Gradient approach to solve cartpole problem
 
-Used as reference: https://pytorch.org/tutorials/intermediate/reinforcement_q_learning
 """
 
 #importing libraries
 import torch
 import torch.nn as nn
-import torch.nn.functional as Fun
-from torch.distributions import Bernoulli
+import torch.optim as optim
 from torch.autograd import Variable
-from itertools import count
 import matplotlib.pyplot as plt
+from torch.distributions import Categorical
 import numpy as np
 import gym
 
-# Hyperparameters
-num_episodes = 5000
-batch_size = 5
-learning_rate = 0.01
-gamma = 0.99
-
-# Batch History
-state_pool = []
-action_pool = []
-reward_pool = []
+# Setting up env
 episode_durations = []
-steps = 0
+env = gym.make('CartPole-v1')
+
+# Hyperparameters
+num_episodes = 1000
+gamma = 0.99
+learning_rate = 0.01
+batch_size = 5
 
 # Policy Model
 class PolicyModel(nn.Module):
     def __init__(self):
         super(PolicyModel, self).__init__()
+        self.state_pool = env.observation_space.shape[0]
+        self.action_pool = env.action_space.n
         
-        self.fc1 = nn.Linear(4, 24)
-        self.fc2 = nn.Linear(24, 36)
-        self.fc2 = nn.Linear(36, 1)
+        self.l1 = nn.Linear(self.state_pool, 128, bias = False)
+        self.l2 = nn.Linear(128, self.action_pool, bias = False)
+        
+        self.gamma = gamma
+        
+        # Batch History
+        self.policy_history = Variable(torch.Tensor())
+        self.reward_episode = []
+        self.reward_pool = []
+        self.loss_pool = []
     
     def forward(self, x):
-        x = Fun.relu(self.fc1(x))
-        x = Fun.relu(self.fc2(x))
-        x = Fun.sigmoid(self.fc3(x))
-        return x
-        
-def update_policy(optimizer, policy_m, steps, state_pool, action_pool, reward_pool):
-    # Discount reward
-    running_add = 0
-    for i in reversed(range(steps)):
-        if reward_pool[i] == 0:
-            running_add = 0
-        else:
-            running_add = running_add * gamma + reward_pool[i]
-            reward_pool[i] = running_add
+        model = torch.nn.Sequential(
+                self.l1,
+                nn.Dropout(p = 0.6), # Adding dropout for overfitting
+                nn.ReLU(),
+                self.l2,
+                nn.Softmax(dim = 1)
+                )
+        return model(x)
+
+# Initialise
+policy = PolicyModel()
+optimizer = optim.Adam(policy.parameters(), lr=learning_rate)
+
+# Select action given state
+def select_action(state):
+    state = torch.from_numpy(state).type(torch.FloatTensor)
+    state = policy(Variable(state))
+    cat = Categorical(state)
+    action = cat.sample()
     
-    # Normalisation
-    reward_mean = np.mean(reward_pool)
-    reward_std = np.std(reward_pool)
-    for i in range(steps):
-        reward_pool[i] = (reward_pool[i] - reward_mean) / reward_std
-        
-    # Gradient Desent
+    # Add probability of action to history
+    if policy.policy_history.dim() != 0:
+        policy.policy_history = torch.cat([policy.policy_history, cat.log_prob(action)])
+    else:
+        policy.policy_history = (cat.log_prob(action))
+    return action
+
+# Update policy using Monte-Carlo   
+def update_policy():
+    R = 0
+    rewards = []
+    
+    # Discount future rewards
+    for r in policy.reward_episode[::-1]:
+        R = r + policy.gamma * R
+        rewards.insert(0, R)
+    
+    # Scale rewards     
+    rewards = torch.FloatTensor(rewards)
+    rewards = (rewards - rewards.mean()) / (rewards.std() + np.finfo(np.float32).eps)
+    
+    # Loss
+    loss = (torch.sum(torch.mul(policy.policy_history, Variable(rewards)).mul(-1), -1))
+    
+    # Update Policy
     optimizer.zero_grad()
-    
-    for i in range(steps):
-        state = state_pool[i]
-        action = Variable(torch.FloatTensor([action_pool[i]]))
-        reward = reward_pool[i]
-        probs = policy_m(state)
-        m = Bernoulli(probs)
-        loss = -m.log_prob(action) * reward  
-        loss.backward()
-    
+    loss.backward()
     optimizer.step()
-    state_pool = []
-    action_pool = []
-    reward_pool = []
-    steps = 0
     
-    return optimizer, policy_m, steps, state_pool, action_pool, reward_pool
+    # Update History
+    policy.loss_pool.append(loss.data[0])
+    policy.reward_pool.append(np.sum(policy.reward_episode))
+    policy.policy_history = Variable(torch.Tensor())
+    policy.reward_episode= []
     
 # Plot duration curve (taken from https://pytorch.org/tutorials/intermediate/reinforcement_q_learning.html)
 def plot_durations():
@@ -101,45 +123,34 @@ def plot_durations():
 
     plt.pause(0.001)  # pause a bit so that plots are updated
 
-# Initialise
-env = gym.make('CartPole-v0')
-policy_m = PolicyModel()
-optimizer = torch.optim.RMSprop(policy_m.parameters(), lr=learning_rate)
-    
-for ep in range(num_episodes):
-        
-    state = env.reset()
-    state = torch.from_numpy(state)
-    state = Variable(state)
-    state.double()
-    env.render(mode='rgb_array')
-        
-    for t in count():
-        prob = policy_m(state)
-        m = Bernoulli(prob)
-        action = m.sample()
-    
-        action = action.data.numpy().astype(int)[0]
-        next_state, reward, done, _ = env.step(action)
-        env.render(mode='rgb_array')
-    
-        if done:
-            reward = 0
-    
-        state_pool.append(state)
-        action_pool.append(float(action))
-        reward_pool.append(reward)
-    
-        state = next_state
-        state = torch.from_numpy(state)
-        state = Variable(state)
-    
-        steps += 1
-    
-        if done:
-            episode_durations.append(t + 1)
-            plot_durations(optimizer, policy_m)
+def main():
+    running_reward = 10
+    for ep in range(num_episodes):
+        state = env.reset()
+        done = False
+        for t in range(1000):
+            action = select_action(state)
+            state, reward, done, _ = env.step(action.data[0])
             
-    if ep > 0 and ep % batch_size == 0:
-        optimizer, policy_m, steps, state_pool, action_pool, reward_pool = update_policy(optimizer, policy_m, steps, state_pool, action_pool, reward_pool)
+            # Save reward
+            policy.reward_episode.append(reward)
+            
+            if done:
+                episode_durations.append(t + 1)
+                #plot_durations(optimizer, policy)
+                break
         
+        running_reward = (running_reward * 0.99) + (t * 0.01)
+        
+        if ep > 0 and ep % batch_size == 0:
+            update_policy()
+        
+        # Outputs
+        if ep % 50 == 0:
+            print('Episode {}\tLast length: {:5d}\tAverage length: {:.2f}'.format(ep, t, running_reward))
+        
+        if running_reward > env.spec.reward_threshold:
+            print("Solved! Running reward is now {} and the last episode runs to {} time steps!".format(running_reward, t))
+            break
+
+main()
