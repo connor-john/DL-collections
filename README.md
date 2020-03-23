@@ -12,7 +12,6 @@ Mainly using PyTorch. _(Environment used will be specified in code comment heade
  
 
 ### To do
- - Tensorflow 2.0: Deep Learning and Artificial Intelligence (Udemy)
  - Practical Deep Learning for Coders (fast.ai)
  - Implement GAN ([paper](https://arxiv.org/abs/1406.2661))
  - Implement MaskGAN ([paper](https://arxiv.org/abs/1801.07736))
