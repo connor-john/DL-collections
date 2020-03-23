@@ -9,7 +9,7 @@ Mainly using PyTorch. _(Environment used will be specified in code comment heade
 ### In progress
  - Cutting-Edge AI: Deep Reingorcement Learning in Python (Udemy)
  - Deep Reinforcement Learning 2.0 (Udemy)
- - Implement Policy Gradient on OpenAI Gym ([ref1](https://karpathy.github.io/2016/05/31/rl/), [ref2](https://pytorch.org/tutorials/intermediate/reinforcement_q_learning.html))
+ 
 
 ### To do
  - Tensorflow 2.0: Deep Learning and Artificial Intelligence (Udemy)
@@ -21,3 +21,4 @@ Mainly using PyTorch. _(Environment used will be specified in code comment heade
 
 ### Completed
  - Deep Learning A-Z: Hands-On Artificial Neural Networks (Udemy)
+ - Implement Policy Gradient on OpenAI Gym ([ref1](https://karpathy.github.io/2016/05/31/rl/), [ref2](https://pytorch.org/tutorials/intermediate/reinforcement_q_learning.html))
