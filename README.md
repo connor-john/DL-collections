@@ -9,6 +9,7 @@ Mainly using PyTorch. _(Environment used will be specified in code comment heade
 ### In progress
  - Cutting-Edge AI: Deep Reingorcement Learning in Python (Udemy)
  - Deep Reinforcement Learning 2.0 (Udemy)
+ - Following [Spinning Up](https://spinningup.openai.com/)
  
 
 ### To do
