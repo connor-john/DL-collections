@@ -50,10 +50,16 @@ def prepare_data(filename):
     indices_char  = { i:ch for i,ch in enumerate(chars) }
     
     return data_size, vocab_size, char_indices, indices_char
-    
-    
+
+# train model    
+def train():
+    return
+
 # Hyper parameters
 lr = 0.001
+n_epochs = 1000
+batch_size = 100
+text_len = 200 
 
 # Initialise
 rnn = RNN()
