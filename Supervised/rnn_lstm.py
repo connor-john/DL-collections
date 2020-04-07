@@ -16,27 +16,35 @@ import torch.nn as nn
 
 # RNN model
 class RNN(nn.Module):
-    def __init__(self, vocab_dim, seq_size, embedding_dim, hidden_dim):
+    def __init__(self, input_dim, output_dim, hidden_dim, hidden_layers = 1):
         super(RNN, self).__init__()
         
-        self.seq_size = seq_size
+        self.input_dim = input_dim
         self.hidden_dim = hidden_dim
+        self.output_dim = output_dim
+        self.hidden_layers = hidden_layers
         
-        self.embedding = nn.Embedding(vocab_dim, embedding_dim)
-        self.lstm = nn.LSTM(embedding_dim, hidden_dim, batch_first=True)
-        self.fc1 = nn.Linear(hidden_dim, vocab_dim)
+        self.embedding = nn.Embedding(input_dim, hidden_dim)
+        self.lstm = nn.LSTM(hidden_dim, hidden_dim, hidden_layers)
+        self.fc1 = nn.Linear(hidden_dim, output_dim)
     
-    def forward(self, x, prev_state):
+    # returns output and hidden state
+    def forward(self, x, hidden):
+        #batch_size = x.size(0)
         e = self.embedding(x)
-        output, state = self.lstm(e, prev_state)
-        out = self.fc1(output)
+        output, hidden = self.lstm(e, hidden)
+        output = self.fc1(output)
         
-        return out, state
+        return output, hidden
     
     # reset hidden state and memory state
     def reset_state(self, batch_size):
         return (torch.zeros(1, batch_size, self.hidden_dim), torch.zeros(1, batch_size, self.hidden_dim))
 
+# Collect and Transform data
+def prepare_data():
+    return 
+    
 # Hyper parameters
 lr = 0.001
 
