@@ -41,9 +41,16 @@ class RNN(nn.Module):
     def reset_state(self, batch_size):
         return (torch.zeros(1, batch_size, self.hidden_dim), torch.zeros(1, batch_size, self.hidden_dim))
 
-# Collect and Transform data
-def prepare_data():
-    return 
+# Collect and prepare data
+def prepare_data(filename):
+    data = open(filename, 'r').read() # should be simple plain text file
+    chars = list(set(data))
+    data_size, vocab_size = len(data), len(chars)
+    char_indices = { ch:i for i,ch in enumerate(chars) }
+    indices_char  = { i:ch for i,ch in enumerate(chars) }
+    
+    return data_size, vocab_size, char_indices, indices_char
+    
     
 # Hyper parameters
 lr = 0.001
@@ -52,3 +59,4 @@ lr = 0.001
 rnn = RNN()
 criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(rnn.parameters(), lr = lr)
+filename = 'input.txt'
