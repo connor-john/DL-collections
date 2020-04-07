@@ -7,9 +7,10 @@ Mainly using PyTorch. _(Environment used will be specified in code comment heade
 <img src="https://images.exxactcorp.com/CMS/landing-page/resource-center/supported-software/deep-learning/pytorch/PyTorch-logo.jpg" width=300 align=left><br><br><br>
 
 ### In progress
- - Cutting-Edge AI: Deep Reingorcement Learning in Python (Udemy)
+ - Cutting-Edge AI: Deep Reinforcement Learning in Python (Udemy)
  - Deep Reinforcement Learning 2.0 (Udemy)
  - Following [Spinning Up](https://spinningup.openai.com/)
+ - Implement LSTM RNN in pytorch
  
 
 ### To do
