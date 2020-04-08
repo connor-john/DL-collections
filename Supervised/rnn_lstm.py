@@ -14,6 +14,14 @@ import numpy as np
 import torch
 import torch.nn as nn
 
+# Hyper parameters
+lr = 0.001
+n_epochs = 1000
+batch_size = 100
+text_len = 200 
+all_characters = string.printable
+n_characters = len(all_characters)
+
 # RNN model
 class RNN(nn.Module):
     def __init__(self, input_dim, output_dim, hidden_dim, hidden_layers = 1):
@@ -41,28 +49,44 @@ class RNN(nn.Module):
     def reset_state(self, batch_size):
         return (torch.zeros(1, batch_size, self.hidden_dim), torch.zeros(1, batch_size, self.hidden_dim))
 
-# Collect and prepare data
-def prepare_data(filename):
-    data = open(filename, 'r').read() # should be simple plain text file
-    chars = list(set(data))
-    data_size, vocab_size = len(data), len(chars)
-    char_indices = { ch:i for i,ch in enumerate(chars) }
-    indices_char  = { i:ch for i,ch in enumerate(chars) }
-    
-    return data_size, vocab_size, char_indices, indices_char
+# Read file
+def read_file(filename):
+    file = open(filename, 'r').read() # should be simple plain text file
+    return file, len(file)
 
-# train model    
-def train():
-    return
-
-# Hyper parameters
-lr = 0.001
-n_epochs = 1000
-batch_size = 100
-text_len = 200 
+# Convert string to tensor
+def char_tensor(string):
+    tensor = torch.zeros(len(string)).long()
+    for c in range(len(string)):
+        try:
+            tensor[c] = all_characters.index(string[c])
+        except:
+            continue
+    return tensor
 
 # Initialise
 rnn = RNN()
 criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(rnn.parameters(), lr = lr)
 filename = 'input.txt'
+
+# train model    
+def train(x, target):
+    hidden = rnn.reset_state(batch_size)
+    hidden = hidden.cuda()
+    
+    rnn.zero_grad()
+    loss = 0
+    
+    for c in range(text_len):
+        output, hidden = rnn(x, hidden)
+        loss =+ criterion(output, target)
+    
+    loss.backward()
+    optimizer.step()
+    
+    return loss.data[0] / text_len
+
+# Main
+def main():
+    
