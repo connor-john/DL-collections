@@ -26,3 +26,4 @@ Mainly using PyTorch. _(Environment used will be specified in code comment heade
  - Implement [DQN](https://github.com/connor-john/DL-collections/blob/master/Reinforcement/DQN.py) on OpenAI Gym
  - Implement [DQN](https://github.com/connor-john/DQN-pytorch) from [paper](https://web.stanford.edu/class/psych209/Readings/MnihEtAlHassibis15NatureControlDeepRL.pdf)
  - Implement [DDQN](https://github.com/connor-john/DQN-pytorch) from [paper](https://arxiv.org/pdf/1509.06461.pdf)
+ - MNIST Classifier
