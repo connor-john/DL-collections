@@ -85,5 +85,23 @@ for i in range(n_epochs):
     
   print(f'epoch {i+1} | train_loss: {train_loss:.4f} | test_loss: {test_loss:.4f}')
 
+# test accuracy
+n_correct = 0.
+n_total = 0.
+
+for inputs, targets in test_loader:
+
+  inputs, targets = inputs.to(device), targets.to(device)
+  inputs = inputs.view(-1, 784)
+
+  outputs = model(inputs)
+
+  _, pred = torch.max(outputs, 1)
+
+  n_correct += (pred == targets).sum().item()
+  n_total += targets.shape[0]
+
+test_acc = n_correct / n_total
+print(f'test_accuracy: {test_acc:.4f}')
                                            
    
