@@ -18,6 +18,7 @@ Mainly using PyTorch. _(Environment used will be specified in code comment heade
  - Implement MaskGAN ([paper](https://arxiv.org/abs/1801.07736))
  - Learn Neural-Symbolic Integration ([lectures](http://www.neural-symbolic.org/) + [paper](https://arxiv.org/abs/1905.06088)) *looks really cool*
  - Implement Neural Style Transfer ([paper](https://arxiv.org/abs/1508.06576)) 
+ - Implement Autoencoder & Variations
 
 ### Completed
  - Deep Learning A-Z: Hands-On Artificial Neural Networks (Udemy)
@@ -27,3 +28,6 @@ Mainly using PyTorch. _(Environment used will be specified in code comment heade
  - Implement [DDQN](https://github.com/connor-john/DQN-pytorch) from [paper](https://arxiv.org/pdf/1509.06461.pdf)
  - MNIST Classifier
  - Implement LSTM RNN in pytorch
+ 
+ ### Ideas
+ - CNN text classification of spam emails
